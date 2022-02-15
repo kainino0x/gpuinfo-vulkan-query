@@ -148,6 +148,8 @@ def run(requirements):
 
 def format_supported_with_optimal_tiling_features(formats_map, format, flags):
     return format in formats_map and (formats_map[format]['optimalTilingFeatures'] & flags) == flags
+def format_supported_with_linear_tiling_features(formats_map, format, flags):
+    return format in formats_map and (formats_map[format]['linearTilingFeatures'] & flags) == flags
 
 
 if __name__ == '__main__':
@@ -291,5 +293,12 @@ if __name__ == '__main__':
     add_rq('stencil8 <= 4 bytes', d24s8_or_s8)
 
     # Additional requirements?
+
+    add_rq('rgba32float filterable', lambda info:
+        format_supported_with_optimal_tiling_features(info.fmts, vk.Format.R32G32B32A32_SFLOAT, vk.FormatFeature.SAMPLED_IMAGE_FILTER_LINEAR))
+    add_rq('rg32float filterable', lambda info:
+        format_supported_with_optimal_tiling_features(info.fmts, vk.Format.R32G32_SFLOAT, vk.FormatFeature.SAMPLED_IMAGE_FILTER_LINEAR))
+    add_rq('r32float filterable', lambda info:
+        format_supported_with_optimal_tiling_features(info.fmts, vk.Format.R32_SFLOAT, vk.FormatFeature.SAMPLED_IMAGE_FILTER_LINEAR))
 
     run(requirements)
