@@ -132,7 +132,7 @@ def run(requirements):
             result += '  In SOME reports ({} deviceNames):\n{}'.format(
                 len(result_list_some), ''.join(result_list_some))
         else:
-            result += 'Requirement "{}" loses no reports!\n'.format(rq.name)
+            result += 'Requirement "{}" loses no further reports!\n'.format(rq.name)
 
     result += ('At least one of each of the following was still supported:\n  + ' +
                '\n  + '.join(sorted(supported_deviceName_values)))
