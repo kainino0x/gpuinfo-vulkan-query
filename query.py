@@ -148,6 +148,8 @@ def run(requirements):
 
 def format_supported_with_optimal_tiling_features(formats_map, format, flags):
     return format in formats_map and (formats_map[format]['optimalTilingFeatures'] & flags) == flags
+def format_supported_with_linear_tiling_features(formats_map, format, flags):
+    return format in formats_map and (formats_map[format]['linearTilingFeatures'] & flags) == flags
 
 
 if __name__ == '__main__':
@@ -250,7 +252,7 @@ if __name__ == '__main__':
            lambda info: 'textureCompressionBC' in info.features or
            ('textureCompressionETC2' in info.features and 'textureCompressionASTC_LDR' in info.features))
 
-    add_rq('Vulkan 1.1 or "VK_KHR_maintenance1" or "VK_AMD_negative_viewport_height" for viewport Y-flip',
+    add_rq('Vulkan 1.1 or VK_KHR_maintenance1 or VK_AMD_negative_viewport_height for viewport Y-flip',
            lambda info: info.report['properties']['apiVersionText'].startswith('1.1') or
            any(map(lambda e:
                    e['extensionName'] == 'VK_KHR_maintenance1' or
