@@ -211,7 +211,7 @@ if __name__ == '__main__':
 
     add_min_limit('maxVertexOutputComponents', 60)
     add_min_limit('maxFragmentInputComponents', 60)
-    add_min_limit('maxComputeSharedMemorySize', 16352)
+    add_min_limit('maxComputeSharedMemorySize', 16384)
     add_min_limit('maxComputeWorkGroupInvocations', 256)
     add_rq('maxComputeWorkGroupSize >= [256,256,64]',
            lambda info:
