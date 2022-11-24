@@ -259,9 +259,6 @@ if __name__ == '__main__':
                    e['extensionName'] == 'VK_AMD_negative_viewport_height',
                    info.report['extensions'])))
 
-    add_rq('timestampValidBits != 0',
-           lambda info: True in (queue['timestampValidBits'] != 0 for queue in info.report['queues']))
-
     # Texture formats
 
     ds_required_flags = vk.FormatFeature.SAMPLED_IMAGE | vk.FormatFeature.DEPTH_STENCIL_ATTACHMENT
