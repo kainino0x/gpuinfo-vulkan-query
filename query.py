@@ -211,8 +211,8 @@ if __name__ == '__main__':
     add_min_limit('maxVertexInputBindingStride', 2048)
     add_min_limit('maxVertexInputAttributeOffset', 2047)
 
-    add_min_limit('maxVertexOutputComponents', 60)
-    add_min_limit('maxFragmentInputComponents', 60)
+    add_min_limit('maxVertexOutputComponents', 64)
+    add_min_limit('maxFragmentInputComponents', 64)
     add_min_limit('maxComputeSharedMemorySize', 16384)
     add_min_limit('maxComputeWorkGroupInvocations', 256)
     add_rq('maxComputeWorkGroupSize >= [256,256,64]',
