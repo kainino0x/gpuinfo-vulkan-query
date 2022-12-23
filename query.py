@@ -266,6 +266,10 @@ if __name__ == '__main__':
                         'VK_KHR_maintenance1' in info.extensions or
                         'VK_AMD_negative_viewport_height' in info.extensions)
 
+    add_rq('storage buffers: Vulkan 1.1 or VK_KHR_storage_buffer_storage_class',
+           lambda info: info.apiVersion >= (1, 1, 0) or
+                        'VK_KHR_storage_buffer_storage_class' in info.extensions)
+
     # Texture formats
 
     ds_required_flags = vk.FormatFeature.SAMPLED_IMAGE | vk.FormatFeature.DEPTH_STENCIL_ATTACHMENT
