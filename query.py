@@ -64,18 +64,23 @@ def run(requirements):
                 print('error parsing {}'.format(filename))
                 continue
 
+        apiVersion = report['properties']['apiVersion']
+
         info = dotdict()
         info.report = report
+        info.apiVariant = apiVersion >> 29
+        info.apiVersion = (
+                (apiVersion >> 22) & 0b1111111,
+                (apiVersion >> 12) & 0b1111111111,
+                apiVersion & 0b111111111111,
+            )
         info.fmts = extractFormatsMap(report)
         info.features = set([k for (k, v) in report['features'].items() if v])
-        if 'core11' in report and 'features' in report['core11']:
-            for k, v in report['core11']['features'].items():
-                if v:
-                    info.features.add(k)
-        if 'core12' in report and 'features' in report['core12']:
-            for k, v in report['core12']['features'].items():
-                if v:
-                    info.features.add(k)
+        for core1x in report:
+            if core1x.startswith('core1') and 'features' in report[core1x]:
+                for k, v in report[core1x]['features'].items():
+                    if v:
+                        info.features.add(k)
         if 'extended' in report and 'devicefeatures2' in report['extended']:
             for v in report['extended']['devicefeatures2']:
                 if v['supported']:
@@ -174,6 +179,9 @@ if __name__ == '__main__':
 
     # Known requirements
 
+    add_rq('API version variant is 0', lambda info: info.apiVariant == 0)
+    add_rq('API version is 1.x.x', lambda info: info.apiVersion[0] == 1)
+
     add_rq('robustBufferAccess',
            lambda info: 'robustBufferAccess' in info.features)
 
@@ -252,8 +260,8 @@ if __name__ == '__main__':
            lambda info: 'textureCompressionBC' in info.features or
            ('textureCompressionETC2' in info.features and 'textureCompressionASTC_LDR' in info.features))
 
-    add_rq('Vulkan 1.1 or VK_KHR_maintenance1 or VK_AMD_negative_viewport_height for viewport Y-flip',
-           lambda info: info.report['properties']['apiVersionText'].startswith('1.1') or
+    add_rq('viewport Y-flip: Vulkan 1.1 or VK_KHR_maintenance1 or VK_AMD_negative_viewport_height',
+           lambda info: info.apiVersion >= (1, 1, 0) or
            any(map(lambda e:
                    e['extensionName'] == 'VK_KHR_maintenance1' or
                    e['extensionName'] == 'VK_AMD_negative_viewport_height',
