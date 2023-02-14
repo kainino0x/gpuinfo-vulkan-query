@@ -186,6 +186,9 @@ if __name__ == '__main__':
     add_rq('robustBufferAccess',
            lambda info: 'robustBufferAccess' in info.features)
 
+    add_rq('standardSampleLocations',
+           lambda info: info.limits['standardSampleLocations'] == 1)
+
     add_rq('maxImageDimension2D and related limits >= 8192',
            lambda info: min(
                info.limits['maxImageDimension2D'],
