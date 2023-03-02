@@ -49,7 +49,7 @@ def run(requirements):
         return m
 
     deviceName_values = set()
-    supported_deviceName_values = set()
+    ids_by_deviceName = defaultdict(lambda: dotdict({ 'supported': [], 'unsupported': [] }))
     reports_filenames = glob.glob('data/reports/*.json')
     reports_entries = sorted(map(lambda f: (
         int(f[len('data/reports/'):-len('.json')]), f), reports_filenames))
@@ -102,8 +102,10 @@ def run(requirements):
                 unsupported_because = rq.name
                 break
 
-        if not unsupported_because:
-            supported_deviceName_values.add(deviceName)
+        if unsupported_because:
+            ids_by_deviceName[deviceName].unsupported.append(report_id)
+        else:
+            ids_by_deviceName[deviceName].supported.append(report_id)
 
         # if unsupported_because:
         #    print('{}: "{}" failed "{}"'.format(
@@ -140,10 +142,19 @@ def run(requirements):
         else:
             result += 'Requirement "{}" loses no further reports!\n'.format(rq.name)
 
-    result += ('At least one of each of the following was still supported:\n  + ' +
-               '\n  + '.join(sorted(supported_deviceName_values)))
+    result_over90 = ''
+    result_under90 = ''
+    for deviceName, ids in sorted(ids_by_deviceName.items()):
+        supported = len(ids.supported)
+        total = supported + len(ids.unsupported)
+        if supported / total >= 0.9:
+            result_over90 += '  + {} ({} of {})\n'.format(deviceName, supported, total)
+        elif supported:
+            result_under90 += '  ? {} ({} of {})\n'.format(deviceName, supported, total)
 
-    print()
+    result += 'At least 90% of each of the following was still supported:\n' + result_over90
+    result += 'At least one, but under 90% of each of the following was still supported:\n' + result_under90
+
     print(result)
 
     result_filename = 'result-{}.txt'.format(time.strftime("%Y%m%d-%H%M%S"))
@@ -189,20 +200,6 @@ if __name__ == '__main__':
     add_rq('standardSampleLocations',
            lambda info: info.limits['standardSampleLocations'] == 1)
 
-    add_rq('maxImageDimension2D and related limits >= 8192',
-           lambda info: min(
-               info.limits['maxImageDimension2D'],
-               info.limits['maxImageDimensionCube'],
-               info.limits['maxFramebufferWidth'],
-               info.limits['maxFramebufferHeight'],
-               info.limits['maxViewportDimensions'][0],
-               info.limits['maxViewportDimensions'][1],
-               info.limits['viewportBoundsRange'][1],
-           ) >= 8192)
-    add_min_limit('maxImageDimension1D', 8192)
-    add_min_limit('maxImageDimension3D', 2048)
-    add_min_limit('maxImageArrayLayers', 256)
-
     add_min_limit('maxBoundDescriptorSets', 4)
     add_min_limit('maxDescriptorSetUniformBuffersDynamic', 8)
     add_min_limit('maxDescriptorSetStorageBuffersDynamic', 4)
@@ -239,6 +236,18 @@ if __name__ == '__main__':
            info.limits['maxComputeWorkGroupCount'][2] >= 65535)
 
     add_min_limit('maxColorAttachments', 8)
+
+    add_min_limit('maxImageDimension2D', 8192)
+    add_min_limit('maxImageDimensionCube', 8192)
+    add_min_limit('maxFramebufferWidth', 8192)
+    add_min_limit('maxFramebufferHeight', 8192)
+    add_rq('maxViewportDimensions[0] >= 8192', lambda info: info.limits['maxViewportDimensions'][0] >= 8192)
+    add_rq('maxViewportDimensions[1] >= 8192', lambda info: info.limits['maxViewportDimensions'][1] >= 8192)
+    add_rq('viewportBoundsRange[0] <= -8192', lambda info: info.limits['viewportBoundsRange'][0] <= -8192)
+    add_rq('viewportBoundsRange[1] >= 8192', lambda info: info.limits['viewportBoundsRange'][1] >= 8192)
+    add_min_limit('maxImageDimension1D', 8192)
+    add_min_limit('maxImageDimension3D', 2048)
+    add_min_limit('maxImageArrayLayers', 256)
 
     add_bits_limit('framebufferColorSampleCounts',
                    vk.SampleCount._1 | vk.SampleCount._4)
