@@ -254,8 +254,9 @@ if __name__ == '__main__':
     add_bits_limit('framebufferDepthSampleCounts',
                    vk.SampleCount._1 | vk.SampleCount._4)
 
-    add_rq('maxFragmentCombinedOutputResources >= 8',
-           lambda info: info.limits['maxFragmentCombinedOutputResources'] >= 8)
+    add_rq('maxFragmentCombinedOutputResources >= 8+4+8, OR is intel/nvidia/amd',
+           lambda info: info.limits['maxFragmentCombinedOutputResources'] >= 8 + 4 + 8 or
+           info.report['properties']['vendorID'] in [0x8086, 0x10de, 0x1002])
 
     add_rq('fragmentStoresAndAtomics',
            lambda info: 'fragmentStoresAndAtomics' in info.features)
