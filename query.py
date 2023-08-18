@@ -236,6 +236,8 @@ if __name__ == '__main__':
            info.limits['maxComputeWorkGroupCount'][2] >= 65535)
 
     add_min_limit('maxColorAttachments', 8)
+    add_min_limit('maxFragmentOutputAttachments', 8)
+    add_min_limit('maxFragmentCombinedOutputResources', 8)
 
     add_min_limit('maxImageDimension2D', 8192)
     add_min_limit('maxImageDimensionCube', 8192)
@@ -253,9 +255,6 @@ if __name__ == '__main__':
                    vk.SampleCount._1 | vk.SampleCount._4)
     add_bits_limit('framebufferDepthSampleCounts',
                    vk.SampleCount._1 | vk.SampleCount._4)
-
-    add_rq('maxFragmentCombinedOutputResources >= 8',
-           lambda info: info.limits['maxFragmentCombinedOutputResources'] >= 8)
 
     add_rq('fragmentStoresAndAtomics',
            lambda info: 'fragmentStoresAndAtomics' in info.features)
