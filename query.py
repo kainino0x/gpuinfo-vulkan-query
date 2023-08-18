@@ -168,6 +168,11 @@ def format_supported_with_optimal_tiling_features(formats_map, format, flags):
 def format_supported_with_linear_tiling_features(formats_map, format, flags):
     return format in formats_map and (formats_map[format]['linearTilingFeatures'] & flags) == flags
 
+def try_to_int(value):
+    try:
+        return int(value, 0)
+    except TypeError:
+        return value
 
 if __name__ == '__main__':
     vk = load_vk_enums()
@@ -183,7 +188,7 @@ if __name__ == '__main__':
 
     def add_max_limit(name, value):
         add_rq('{} <= {}'.format(name, value),
-               lambda info: int(info.limits[name], 0) <= value)
+               lambda info: try_to_int(info.limits[name]) <= value)
 
     def add_bits_limit(name, bits):
         add_rq('{} has bits 0b{:b}'.format(name, bits),
