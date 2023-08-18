@@ -88,6 +88,15 @@ def run(requirements):
                     info.features.add(v['name'])
         info.limits = report['properties']['limits']
 
+        info.properties = {}
+        for core1x in report:
+            if core1x.startswith('core1') and 'properties' in report[core1x]:
+                for k, v in report[core1x]['properties'].items():
+                    info.properties[k] = v
+        if 'extended' in report and 'deviceproperties2' in report['extended']:
+            for v in report['extended']['deviceproperties2']:
+                info.properties[v['name']] = v['value']
+
         # +  ' ' + report['properties']['driverVersionText']
         deviceName = report['properties']['deviceName']
         deviceName = re.sub(r' \((LLVM|ACO|Subzero).*?\)', '', deviceName)
@@ -188,6 +197,10 @@ if __name__ == '__main__':
     def add_bits_limit(name, bits):
         add_rq('{} has bits 0b{:b}'.format(name, bits),
                lambda info: (info.limits[name] & bits) == bits)
+
+    def add_min_opt_property(name, value):
+        add_rq('{} >= {}'.format(name, value),
+               lambda info: (name not in info.properties) or int(info.properties[name]) >= value)
 
     # Known requirements
 
@@ -308,5 +321,9 @@ if __name__ == '__main__':
     add_rq('stencil8 <= 4 bytes', d24s8_or_s8)
 
     # Additional requirements?
+
+    add_min_opt_property('maxMemoryAllocationSize', 268435456)
+    add_min_opt_property('maxBufferSize', 268435456)
+    add_min_opt_property('maxPerSetDescriptors', 700)
 
     run(requirements)
