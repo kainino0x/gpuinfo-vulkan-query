@@ -320,10 +320,11 @@ if __name__ == '__main__':
                 format_supported_with_optimal_tiling_features(info.fmts, vk.Format.S8_UINT, ds_required_flags))
     add_rq('stencil8 <= 4 bytes', d24s8_or_s8)
 
-    # Additional requirements?
-
     add_min_opt_property('maxMemoryAllocationSize', 268435456)
     add_min_opt_property('maxBufferSize', 268435456)
+    # TODO(https://github.com/gpuweb/gpuweb/issues/4270): remove or update this based on the conclusion there
     add_min_opt_property('maxPerSetDescriptors', 700)
+    
+    # Additional requirements?
 
     run(requirements)
