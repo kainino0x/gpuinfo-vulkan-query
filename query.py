@@ -259,7 +259,11 @@ if __name__ == '__main__':
 
     add_min_limit('maxColorAttachments', 8)
     add_min_limit('maxFragmentOutputAttachments', 8)
-    add_min_limit('maxFragmentCombinedOutputResources', 8)
+    # Most drivers report this limit incorrectly.
+    # https://github.com/gpuweb/gpuweb/issues/3631#issuecomment-1498747606
+    add_rq('maxFragmentCombinedOutputResources >= 8+4+8, OR is intel/nvidia/amd/imgtec',
+       lambda info: info.limits['maxFragmentCombinedOutputResources'] >= 8 + 4 + 8 or
+       info.report['properties']['vendorID'] in [0x8086, 0x10de, 0x1002, 0x1010])
 
     add_min_limit('maxImageDimension2D', 8192)
     add_min_limit('maxImageDimensionCube', 8192)
