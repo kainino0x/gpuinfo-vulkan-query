@@ -39,9 +39,9 @@ def load_vk_enums():
 
 
 Rq = namedtuple('Rq', ['name', 'passes', 'passed_reports', 'failed_reports'])
+Group = namedtuple('Group', ['name', 'sort'])
 
-
-def run(requirements):
+def run(requirements, groups = []):
     def extractFormatsMap(report):
         m = dotdict()
         for fmt in report['formats']:
@@ -53,6 +53,10 @@ def run(requirements):
     reports_filenames = glob.glob('data/reports/*.json')
     reports_entries = sorted(map(lambda f: (
         int(f[len('data/reports/'):-len('.json')]), f), reports_filenames))
+
+    total_supported = 0
+    device_groups = defaultdict(lambda: defaultdict(lambda: 0))
+
     for report_id, filename in reports_entries:
         report = None
         with open(filename) as f:
@@ -115,6 +119,10 @@ def run(requirements):
             ids_by_deviceName[deviceName].unsupported.append(report_id)
         else:
             ids_by_deviceName[deviceName].supported.append(report_id)
+            total_supported += 1
+            for group in groups:
+                bucket = group.sort(info)
+                device_groups[group.name][bucket] += 1
 
         # if unsupported_because:
         #    print('{}: "{}" failed "{}"'.format(
@@ -164,6 +172,13 @@ def run(requirements):
     result += 'At least 90% of each of the following was still supported:\n' + result_over90
     result += 'At least one, but under 90% of each of the following was still supported:\n' + result_under90
 
+    if len(device_groups):
+        result += '\n\nGroupings of {} supported devices\n'.format(total_supported)
+        for group_name, buckets in sorted(device_groups.items()):
+            result += '\n\n{}\n=====================\n'.format(group_name)
+            for bucket_name, count in sorted(buckets.items()):
+                result += '{}: {} ({}%)\n'.format(bucket_name, count, round(count / total_supported * 100, 1))
+
     print(result)
 
     result_filename = 'result-{}.txt'.format(time.strftime("%Y%m%d-%H%M%S"))
@@ -190,6 +205,7 @@ def try_to_int(value):
 if __name__ == '__main__':
     vk = load_vk_enums()
     requirements = []
+    groups = []
 
     def add_rq(name, passes):
         requirements.append(Rq(name, passes, defaultdict(
@@ -210,6 +226,18 @@ if __name__ == '__main__':
     def add_min_opt_property(name, value):
         add_rq('{} >= {}'.format(name, value),
                lambda info: (name not in info.properties) or int(info.properties[name]) >= value)
+
+    def add_group(name, sort):
+        groups.append(Group(name, sort))
+
+    def add_substr_group(name, property, buckets):
+        def sort(info):
+            p = property(info)
+            for bucket in buckets:
+                if p.lower().find(bucket.lower()) != -1:
+                    return bucket;
+            return "Other"
+        groups.append(Group(name, sort))
 
     # Known requirements
 
@@ -339,4 +367,12 @@ if __name__ == '__main__':
     
     # Additional requirements?
 
-    run(requirements)
+    # Grouping example:
+    # Uncommenting the following lines would generate some basic stats on Android OS versions and GPUs
+    # that meet all of the above criteria. 
+
+    # add_rq("Android", lambda info: info.report['environment']['name'] == "android")
+    # add_group("OS Version", lambda info: info.report['environment']['version'].split('.')[0])
+    # add_substr_group("GPU", lambda info: info.report['properties']['deviceName'], ['Mali', 'Adreno', 'PowerVR', 'Tegra'])
+
+    run(requirements, groups)
