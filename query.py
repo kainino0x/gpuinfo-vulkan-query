@@ -362,8 +362,6 @@ if __name__ == '__main__':
 
     add_min_opt_property('maxMemoryAllocationSize', 268435456)
     add_min_opt_property('maxBufferSize', 268435456)
-    # TODO(https://github.com/gpuweb/gpuweb/issues/4270): remove or update this based on the conclusion there
-    add_min_opt_property('maxPerSetDescriptors', 700)
     
     # Additional requirements?
 
