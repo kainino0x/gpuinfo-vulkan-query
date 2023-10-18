@@ -9,9 +9,8 @@ import re
 import sys
 import getopt
 
-class Architecture:
-    def __init__(self, name, devices, mask):
-        self.name = name
+class DeviceGroup:
+    def __init__(self, devices, mask):
         self.mask = mask
         self.deviceIds = []
         for device in devices:
@@ -22,6 +21,20 @@ class Architecture:
             if testId & self.mask == deviceId:
                 return True
 
+        return False
+
+class Architecture:
+    def __init__(self, name):
+        self.name = name
+        self.deviceGroups = []
+
+    def addDeviceGroup(self, devices, mask):
+        self.deviceGroups.append(DeviceGroup(devices, mask))
+
+    def matchDeviceId(self, testId):
+        for deviceGroup in self.deviceGroups:
+            if deviceGroup.matchDeviceId(testId):
+                return True
         return False
 
 class Device:
@@ -47,8 +60,14 @@ class Vendor:
         else:
             self.devices[deviceId] = Device(deviceId, deviceName)
 
-    def addArchitecture(self, architecture):
-        self.architectures[architecture.name] = architecture
+    def addArchitecture(self, name, devices, mask):
+        if name in self.architectures:
+            arch = self.architectures[name]
+        else:
+            arch = Architecture(name)
+            self.architectures[name] = arch
+
+        arch.addDeviceGroup(devices, mask)
 
 def collectDevices(vendors):
     reports_filenames = glob.glob('data/reports/*.json')
@@ -96,6 +115,9 @@ def collectGpuInfo(vendors, gpuInfoPath):
             print('error parsing {}'.format(gpuInfoPath))
 
         for vendorName, vendorJson in gpuInfoJson['vendors'].items():
+            if vendorName[0] == '_':
+                continue
+
             id = int(vendorJson['id'], 0)
 
             if not id in vendors:
@@ -104,17 +126,21 @@ def collectGpuInfo(vendors, gpuInfoPath):
             vendor = vendors[id]
             vendor.name = vendorName
 
-            deviceMask = 0xFFFF
-            if 'deviceMask' in vendorJson:
-                deviceMask = int(vendorJson['deviceMask'] , 0)
+            if not 'devices' in vendorJson:
+                continue;
 
-            if 'architecture' in vendorJson:
-                archJson = vendorJson['architecture']
-                for archName, archDevices in archJson.items():
-                    if archName[0] == '_':
-                        continue
+            for deviceGroup in vendorJson['devices']:
+                deviceMask = 0xFFFF
+                if 'mask' in deviceGroup:
+                    deviceMask = int(deviceGroup['mask'] , 0)
 
-                    vendor.addArchitecture(Architecture(archName, archDevices, deviceMask))
+                if 'architecture' in deviceGroup:
+                    archJson = deviceGroup['architecture']
+                    for archName, archDevices in archJson.items():
+                        if archName[0] == '_':
+                            continue
+
+                        vendor.addArchitecture(archName, archDevices, deviceMask)
 
 
 if __name__ == '__main__':
