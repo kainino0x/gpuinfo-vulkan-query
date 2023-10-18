@@ -41,7 +41,8 @@ def load_vk_enums():
 Rq = namedtuple('Rq', ['name', 'passes', 'passed_reports', 'failed_reports'])
 Group = namedtuple('Group', ['name', 'sort'])
 
-def run(requirements, groups = []):
+
+def run(requirements, groups=[]):
     def extractFormatsMap(report):
         m = dotdict()
         for fmt in report['formats']:
@@ -49,7 +50,8 @@ def run(requirements, groups = []):
         return m
 
     deviceName_values = set()
-    ids_by_deviceName = defaultdict(lambda: dotdict({ 'supported': [], 'unsupported': [] }))
+    ids_by_deviceName = defaultdict(
+        lambda: dotdict({'supported': [], 'unsupported': []}))
     reports_filenames = glob.glob('data/reports/*.json')
     reports_entries = sorted(map(lambda f: (
         int(f[len('data/reports/'):-len('.json')]), f), reports_filenames))
@@ -74,10 +76,10 @@ def run(requirements, groups = []):
         info.report = report
         info.apiVariant = apiVersion >> 29
         info.apiVersion = (
-                (apiVersion >> 22) & 0b1111111,
-                (apiVersion >> 12) & 0b1111111111,
-                apiVersion & 0b111111111111,
-            )
+            (apiVersion >> 22) & 0b1111111,
+            (apiVersion >> 12) & 0b1111111111,
+            apiVersion & 0b111111111111,
+        )
         info.fmts = extractFormatsMap(report)
         info.features = set([k for (k, v) in report['features'].items() if v])
         info.extensions = set(e['extensionName'] for e in report['extensions'])
@@ -157,7 +159,8 @@ def run(requirements, groups = []):
             result += '  In SOME reports ({} deviceNames):\n{}'.format(
                 len(result_list_some), ''.join(result_list_some))
         else:
-            result += 'Requirement "{}" loses no further reports!\n'.format(rq.name)
+            result += 'Requirement "{}" loses no further reports!\n'.format(
+                rq.name)
 
     result_over90 = ''
     result_under90 = ''
@@ -165,19 +168,23 @@ def run(requirements, groups = []):
         supported = len(ids.supported)
         total = supported + len(ids.unsupported)
         if supported / total >= 0.9:
-            result_over90 += '  + {} ({} of {})\n'.format(deviceName, supported, total)
+            result_over90 += '  + {} ({} of {})\n'.format(deviceName,
+                                                          supported, total)
         elif supported:
-            result_under90 += '  ? {} ({} of {})\n'.format(deviceName, supported, total)
+            result_under90 += '  ? {} ({} of {})\n'.format(deviceName,
+                                                           supported, total)
 
     result += 'At least 90% of each of the following was still supported:\n' + result_over90
     result += 'At least one, but under 90% of each of the following was still supported:\n' + result_under90
 
     if len(device_groups):
-        result += '\n\nGroupings of {} supported devices\n'.format(total_supported)
+        result += '\n\nGroupings of {} supported devices\n'.format(
+            total_supported)
         for group_name, buckets in sorted(device_groups.items()):
             result += '\n\n{}\n=====================\n'.format(group_name)
             for bucket_name, count in sorted(buckets.items()):
-                result += '{}: {} ({}%)\n'.format(bucket_name, count, round(count / total_supported * 100, 1))
+                result += '{}: {} ({}%)\n'.format(bucket_name,
+                                                  count, round(count / total_supported * 100, 1))
 
     print(result)
 
@@ -235,7 +242,7 @@ if __name__ == '__main__':
             p = property(info)
             for bucket in buckets:
                 if p.lower().find(bucket.lower()) != -1:
-                    return bucket;
+                    return bucket
             return "Other"
         groups.append(Group(name, sort))
 
@@ -290,17 +297,21 @@ if __name__ == '__main__':
     # Most drivers report this limit incorrectly.
     # https://github.com/gpuweb/gpuweb/issues/3631#issuecomment-1498747606
     add_rq('maxFragmentCombinedOutputResources >= 8+4+8, OR is intel/nvidia/amd/imgtec',
-       lambda info: info.limits['maxFragmentCombinedOutputResources'] >= 8 + 4 + 8 or
-       info.report['properties']['vendorID'] in [0x8086, 0x10de, 0x1002, 0x1010])
+           lambda info: info.limits['maxFragmentCombinedOutputResources'] >= 8 + 4 + 8 or
+           info.report['properties']['vendorID'] in [0x8086, 0x10de, 0x1002, 0x1010])
 
     add_min_limit('maxImageDimension2D', 8192)
     add_min_limit('maxImageDimensionCube', 8192)
     add_min_limit('maxFramebufferWidth', 8192)
     add_min_limit('maxFramebufferHeight', 8192)
-    add_rq('maxViewportDimensions[0] >= 8192', lambda info: info.limits['maxViewportDimensions'][0] >= 8192)
-    add_rq('maxViewportDimensions[1] >= 8192', lambda info: info.limits['maxViewportDimensions'][1] >= 8192)
-    add_rq('viewportBoundsRange[0] <= -8192', lambda info: info.limits['viewportBoundsRange'][0] <= -8192)
-    add_rq('viewportBoundsRange[1] >= 8192', lambda info: info.limits['viewportBoundsRange'][1] >= 8192)
+    add_rq('maxViewportDimensions[0] >= 8192',
+           lambda info: info.limits['maxViewportDimensions'][0] >= 8192)
+    add_rq('maxViewportDimensions[1] >= 8192',
+           lambda info: info.limits['maxViewportDimensions'][1] >= 8192)
+    add_rq('viewportBoundsRange[0] <= -8192',
+           lambda info: info.limits['viewportBoundsRange'][0] <= -8192)
+    add_rq('viewportBoundsRange[1] >= 8192',
+           lambda info: info.limits['viewportBoundsRange'][1] >= 8192)
     add_min_limit('maxImageDimension1D', 8192)
     add_min_limit('maxImageDimension3D', 2048)
     add_min_limit('maxImageArrayLayers', 256)
@@ -327,8 +338,8 @@ if __name__ == '__main__':
 
     add_rq('viewport Y-flip: Vulkan 1.1 or VK_KHR_maintenance1 or VK_AMD_negative_viewport_height',
            lambda info: info.apiVersion >= (1, 1, 0) or
-                        'VK_KHR_maintenance1' in info.extensions or
-                        'VK_AMD_negative_viewport_height' in info.extensions)
+           'VK_KHR_maintenance1' in info.extensions or
+           'VK_AMD_negative_viewport_height' in info.extensions)
 
     # Texture formats
 
@@ -362,12 +373,12 @@ if __name__ == '__main__':
 
     add_min_opt_property('maxMemoryAllocationSize', 268435456)
     add_min_opt_property('maxBufferSize', 268435456)
-    
+
     # Additional requirements?
 
     # Grouping example:
     # Uncommenting the following lines would generate some basic stats on Android OS versions and GPUs
-    # that meet all of the above criteria. 
+    # that meet all of the above criteria.
 
     # add_rq("Android", lambda info: info.report['environment']['name'] == "android")
     # add_group("OS Version", lambda info: info.report['environment']['version'].split('.')[0])
