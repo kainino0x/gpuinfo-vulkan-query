@@ -336,9 +336,9 @@ if __name__ == '__main__':
            lambda info: 'textureCompressionBC' in info.features or
            ('textureCompressionETC2' in info.features and 'textureCompressionASTC_LDR' in info.features))
 
-    add_rq('Vulkan 1.1 or VK_KHR_maintenance1',
+    add_rq('Vulkan 1.1 or VK_KHR_maintenance2',
            lambda info: info.apiVersion >= (1, 1, 0) or
-           'VK_KHR_maintenance1' in info.extensions)
+           'VK_KHR_maintenance2' in info.extensions)
 
     # Texture formats
 
