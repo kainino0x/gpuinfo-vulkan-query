@@ -27,10 +27,9 @@ def load_vk_enums():
         name = e.attrib['name'][len('VK_FORMAT_'):]
         vk.Format[name] = int(e.attrib['value'])
     vk.FormatFeature = dotdict()
-    for e in root.findall("./enums[@name='VkFormatFeatureFlagBits2']/*"):
-        if 'alias' not in e.attrib:
-            name = e.attrib['name'][len('VK_FORMAT_FEATURE_2_'):-len('_BIT')]
-            vk.FormatFeature[name] = 1 << int(e.attrib['bitpos'])
+    for e in root.findall("./enums[@name='VkFormatFeatureFlagBits']/*"):
+        name = e.attrib['name'][len('VK_FORMAT_FEATURE_'):-len('_BIT')]
+        vk.FormatFeature[name] = 1 << int(e.attrib['bitpos'])
     vk.SampleCount = dotdict()
     for e in root.findall("./enums[@name='VkSampleCountFlagBits']/*"):
         # keep the leading underscore
