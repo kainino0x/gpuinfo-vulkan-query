@@ -147,8 +147,15 @@ if __name__ == '__main__':
     vendors = {}
     useGpuInfo = False
 
-    if (len(sys.argv) > 1):
-        collectGpuInfo(vendors, sys.argv[1])
+    opts, args = getopt.getopt(sys.argv[1:], 'a')
+
+    showAll = False
+    for o, a in opts:
+        if o == "-a":
+            showAll = True
+
+    if (len(args) > 0):
+        collectGpuInfo(vendors, args[0])
         useGpuInfo = True
 
     collectDevices(vendors)
@@ -186,13 +193,30 @@ if __name__ == '__main__':
         totalEntries += filteredEntries
         print('\n\=== The following devices had no corresponding entry in GPUInfo ===')
 
+    entriesSkipped = False
     for (vendorId, vendor) in vendors.items():
+        # Filter out vendorId of 0x0000 if -a is not specified
+        if vendorId == 0 and not showAll:
+            entriesSkipped = True
+            continue
+
+        # Filter out Apple devices if -a is not specified,
+        # because we don't handle them in the GPUInfo JSON
+        if vendorId == 0x106b and not showAll:
+            entriesSkipped = True
+            continue
+
         if len(vendor.devices):
             print('\n{} VendorId: 0x{:04x}, {} Devices'.format(vendor.name, vendorId, len(vendor.devices)))
 
             totalDevices += len(vendor.devices)
 
             for (deviceId, device) in vendor.devices.items():
+                # Filter out deviceId of 0x0000 if -a is not specified
+                if deviceId == 0 and not showAll:
+                    entriesSkipped = True
+                    continue
+
                 totalEntries += device.count
                 print(' - DeviceId: 0x{:04x}, {} Entries'.format(deviceId, device.count))
 
@@ -203,3 +227,5 @@ if __name__ == '__main__':
     if useGpuInfo:
         print('{} entries categorized ({:.2f}%)'.format(filteredEntries, (filteredEntries/totalEntries) * 100))
         print('{} devices categorized ({:.2f}%)'.format(filteredDevices, (filteredDevices/totalDevices) * 100))
+    if entriesSkipped:
+        print('Some devices or vendors were skipped due to not being applicable to GPUInfo. To view all devices use the -a command line option')
