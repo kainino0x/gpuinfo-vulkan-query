@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 # Format this file with python3 -m autopep8 -i fetch-new-data.py
 
+# Run this script if you need to update the data in the data repository.
+# Please be nice to the operator of the server and use the existing data to
+# avoid re-scraping all of the data that's been scraped already. :)
+
 import urllib.request
 import json
 import os
@@ -52,4 +56,5 @@ if __name__ == '__main__':
             s = response.read().decode('utf-8')
             f.write(clean_json(s))
 
+        # Be nice to the server and don't scrape too aggressively.
         time.sleep(2.0)
