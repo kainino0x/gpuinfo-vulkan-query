@@ -195,11 +195,11 @@ def run(requirements, groups=[]):
 
 
 def format_supported_with_optimal_tiling_features(formats_map, format, flags):
-    return format in formats_map and (formats_map[format]['optimalTilingFeatures'] & flags) == flags
+    return format in formats_map and (int(formats_map[format]['optimalTilingFeatures']) & flags) == flags
 
 
 def format_supported_with_linear_tiling_features(formats_map, format, flags):
-    return format in formats_map and (formats_map[format]['linearTilingFeatures'] & flags) == flags
+    return format in formats_map and (int(formats_map[format]['linearTilingFeatures']) & flags) == flags
 
 
 def try_to_int(value):
