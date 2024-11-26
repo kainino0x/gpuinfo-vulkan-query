@@ -2,11 +2,13 @@
 
 ## License
 
-This software is not presently released under a license.
+This software is under `BSD-3-Clause`, matching the W3C `GPU for the Web`
+project: <https://github.com/gpuweb/gpuweb/blob/main/LICENSE.md>
 
 The data in `data/` is obtained under `CC BY 4.0` as specified there.
 
-`vk.xml` comes from <https://github.com/KhronosGroup/Vulkan-Headers/blob/main/registry/vk.xml>
+`third_party/vulkan/vk.xml` comes from
+<https://github.com/KhronosGroup/Vulkan-Headers/blob/main/registry/vk.xml>
 and is licensed according to the license in that file.
 
 ## Getting the code

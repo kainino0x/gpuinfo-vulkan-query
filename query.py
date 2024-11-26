@@ -19,7 +19,7 @@ class dotdict(dict):
 
 def load_vk_enums():
     '''Load useful enums from vk.xml'''
-    tree = ET.parse('vk.xml')
+    tree = ET.parse('third_party/vulkan/vk.xml')
     root = tree.getroot()
     vk = dotdict()
     vk.Format = dotdict()
