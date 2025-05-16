@@ -141,16 +141,15 @@ def run(requirements, groups=[]):
             for name, ids in failed_reports_sorted.items():
                 passed_reports = rq.passed_reports[name]
                 if len(passed_reports) == 0:
-                    result_list_all.append('    x {}: {} ({})\n'.format(
-                        name, len(ids), ' '.join(map(str, ids))))
+                    result_list_all.append('    x {}: {} of {}\n'.format(
+                        name, len(ids), len(ids)))
 
             for name, ids in failed_reports_sorted.items():
                 passed_reports = rq.passed_reports[name]
                 if len(passed_reports) != 0:
-                    result_list_some.append('    ~ {}: {} of {} ({}; ok: {})\n'.format(
+                    result_list_some.append('    ~ {}: {} of {} ({})\n'.format(
                         name, len(ids), len(ids) + len(passed_reports),
-                        ' '.join(map(str, ids)),
-                        ' '.join(map(str, passed_reports))))
+                        ' '.join(map(str, ids))))
 
             result += 'Requirement "{}" loses {} (and partially loses {}) further deviceNames:\n'.format(
                 rq.name, len(result_list_all), len(result_list_some))
