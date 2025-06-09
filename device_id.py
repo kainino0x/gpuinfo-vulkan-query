@@ -81,7 +81,14 @@ def collectDevices(vendors):
     reports_entries = sorted(map(lambda f: (
         int(f[len('data/reports/'):-len('.json')]), f), reports_filenames))
 
+    print('Collecting device information from {} records...'.format(len(reports_entries)))
+
+    i = 0;
     for report_id, filename in reports_entries:
+        i = i + 1
+        if (i % 1000 == 0):
+            print('Reading record {} of {} ({:.2f}%)'.format(i, len(reports_entries), (i / len(reports_entries)) * 100), end='\r')
+
         report = None
         with open(filename) as f:
             try:
@@ -174,7 +181,7 @@ if __name__ == '__main__':
     totalDevices = 0
 
     if useGpuInfo:
-        print('\n\=== The following devices have a corresponding entry in GPUInfo ===')
+        print('\n=== The following devices have a corresponding entry in GPUInfo ===')
 
         for (vendorId, vendor) in vendors.items():
             if not vendor.name:
@@ -198,7 +205,7 @@ if __name__ == '__main__':
 
         totalDevices += filteredDevices
         totalEntries += filteredEntries
-        print('\n\=== The following devices had no corresponding entry in GPUInfo ===')
+        print('\n=== The following devices had no corresponding entry in GPUInfo ===')
 
     entriesSkipped = False
     for (vendorId, vendor) in vendors.items():
