@@ -34,7 +34,14 @@ if __name__ == '__main__':
         print("Run this script from outside the data repository.")
         sys.exit(1)
 
-    with urllib.request.urlopen('https://vulkan.gpuinfo.org/api/v2/getreportlist.php') as resp:
+    HEADERS = {
+        'User-Agent': 'kainino0x/gpuinfo-vulkan-query',
+    }
+
+    with urllib.request.urlopen(
+            urllib.request.Request(
+                'https://vulkan.gpuinfo.org/api/v2/getreportlist.php',
+                headers=HEADERS)) as resp:
         report_list = json.loads(clean_json(resp.read().decode('utf-8')))
 
     print("Found {} reports".format(len(report_list)))
@@ -52,9 +59,24 @@ if __name__ == '__main__':
         print('Getting {}'.format(filename))
 
         with open(filename, 'w') as f:
-            response = urllib.request.urlopen(url)
-            s = response.read().decode('utf-8')
-            f.write(clean_json(s))
+            while True:
+                try:
+                    resp = urllib.request.urlopen(urllib.request.Request(url, headers=HEADERS))
+                    break
+                except urllib.error.HTTPError as ex:
+                    print(ex.reason)
+                    if ex.code == 429:  # Too Many Requests
+                        time.sleep(2.0)
+                        continue
+                    elif ex.code == 500:  # Internal Server Error
+                        time.sleep(5.0)
+                        continue
+                    else:
+                        raise
+            with resp:
+                s = resp.read().decode('utf-8')
+                f.write(clean_json(s))
 
         # Be nice to the server and don't scrape too aggressively.
-        time.sleep(2.0)
+        # (This number seems to mostly just avoid hitting Too Many Requests.)
+        time.sleep(0.7)
