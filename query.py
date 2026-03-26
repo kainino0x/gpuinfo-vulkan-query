@@ -101,7 +101,25 @@ def run(requirements, groups=[]):
                     info.properties[k] = v
         if 'extended' in report and 'deviceproperties2' in report['extended']:
             for v in report['extended']['deviceproperties2']:
+                # These entries tell us which extension they come from, too,
+                # but we just ignore that for now since we don't need it.
                 info.properties[v['name']] = v['value']
+
+        # Normalize properties to numbers where possible
+        for k, v in info.properties.items():
+            if v == 'true':
+                v = 1
+            elif v == 'false':
+                v = 0
+            elif type(v) == str:
+                try:
+                    v = int(v)
+                except ValueError:
+                    try:
+                        v = float(v)
+                    except ValueError:
+                        pass
+            info.properties[k] = v
 
         # +  ' ' + report['properties']['driverVersionText']
         deviceName = report['properties']['deviceName']
