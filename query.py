@@ -175,8 +175,9 @@ def run(requirements, groups=[]):
                 len(result_list_all), ''.join(result_list_all))
             result += '  In SOME reports ({} deviceNames):\n{}'.format(
                 len(result_list_some), ''.join(result_list_some))
+            result += '\n'
         else:
-            result += 'Requirement "{}" loses no further reports!\n'.format(
+            result += 'Requirement "{}" loses no further reports!\n\n'.format(
                 rq.name)
 
     result_over90 = ''
